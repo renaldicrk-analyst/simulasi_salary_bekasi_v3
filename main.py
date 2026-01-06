@@ -286,14 +286,23 @@ else:
 
     achieved = bonus_df[bonus_df["bonus"] > 0]
 
+    # ======================================================
+    # HITUNG INFO ADDITIONAL
+    # ======================================================
+    total_outlet = df["outlet"].nunique()                      # total outlet unik
+    achieved_outlet = achieved["outlet"].nunique()            # outlet yang achieve
+    achievement_pct = (achieved_outlet / total_outlet) if total_outlet > 0 else 0  # persentase
+
     total_sales = df["sales"].sum()
     total_salary_without_bonus = df["total_salary"].sum()
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Outlet Achieve Target", achieved["outlet"].nunique())
-    c2.metric("Total Bonus Bulanan", f"Rp {achieved['bonus'].sum():,.0f}")
-    c3.metric("Total Sales", f"Rp {total_sales:,.0f}")
-    c4.metric("Total Salary (Tanpa Bonus)", f"Rp {total_salary_without_bonus:,.0f}")
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1.metric("Total Outlet", total_outlet)
+    c2.metric("Outlet Achieve Target", achieved_outlet)
+    c3.metric("% Achieve Target", f"{achievement_pct:.1%}")
+    c4.metric("Total Bonus Bulanan", f"Rp {achieved['bonus'].sum():,.0f}")
+    c5.metric("Total Sales", f"Rp {total_sales:,.0f}")
+    c6.metric("Total Salary (Tanpa Bonus)", f"Rp {total_salary_without_bonus:,.0f}")
 
     total_salary = total_salary_without_bonus + achieved["bonus"].sum()
     st.metric("Salary Cost", f"{total_salary / total_sales:.2%}")
