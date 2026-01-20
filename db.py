@@ -1,18 +1,16 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import pandas as pd
 import streamlit as st
 
-@st.cache_data(show_spinner=False)
-def fetch_dataframe(query, params):
-    engine = create_engine(
-        f"postgresql+psycopg2://{st.secrets['db']['user']}:"
-        f"{st.secrets['db']['password']}@"
-        f"{st.secrets['db']['host']}:"
-        f"{st.secrets['db']['port']}/"
-        f"{st.secrets['db']['dbname']}"
-    )
+@st.cache_data
+def fetch_dataframe(query, params=None):
+    engine = create_engine(st.secrets["DATABASE_URL"])
 
     with engine.connect() as conn:
-        df = pd.read_sql(query, conn, params=params)
+        df = pd.read_sql(
+            text(query),   
+            conn,
+            params=params
+        )
 
     return df
