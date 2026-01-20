@@ -50,6 +50,16 @@ end_date = start_date + dt.timedelta(days=days - 1)
 gapok = st.sidebar.number_input("Gapok / Hari", value=90_000, step=5_000)
 
 # ======================================================
+# GAJI CREW PERBANTUAN
+# ======================================================
+gaji_perbantuan = st.sidebar.number_input(
+    "Gaji Crew Perbantuan / Hari",
+    value=75_000,
+    step=5_000
+)
+
+
+# ======================================================
 # DEFAULT PARAM (ANTI SQL ERROR)
 # ======================================================
 bonus_trigger = flat_bonus = 0
@@ -207,6 +217,8 @@ params = {
     "crew_1_threshold": crew_1_threshold,
     "crew_2_threshold": crew_2_threshold,
     "crew_3_threshold": crew_3_threshold,
+    "gapok": gapok,
+    "gaji_perbantuan": gaji_perbantuan
 }
 
 # LOAD DATA

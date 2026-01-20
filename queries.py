@@ -114,7 +114,8 @@ crew_logic AS (
             WHEN sales >= %(crew_1_threshold)s THEN 1
             ELSE 0
         END AS crew_perbantuan,
-        %(gapok)s AS gaji_perbantuan
+        %(gaji_perbantuan)s AS gaji_perbantuan
+
     FROM salary_logic
 )
 
