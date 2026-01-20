@@ -1,3 +1,5 @@
+# queries.py
+
 SIMULATION_QUERY = """
 WITH base AS (
     SELECT
@@ -6,12 +8,12 @@ WITH base AS (
         branch,
         sales
     FROM mv_manpower_cost_v2
-    WHERE branch = :branch
-      AND tanggal BETWEEN :start_date AND :end_date
+    WHERE branch = %(branch)s
+      AND tanggal BETWEEN %(start_date)s AND %(end_date)s
 ),
 
 -- =========================
--- AGGREGATE BULANAN
+-- AGGREGATE BULANAN PER OUTLET
 -- =========================
 monthly_sales AS (
     SELECT
@@ -22,9 +24,6 @@ monthly_sales AS (
     GROUP BY outlet
 ),
 
--- =========================
--- LOGIC GAJI & BONUS
--- =========================
 salary_logic AS (
     SELECT
         b.tanggal,
@@ -33,62 +32,70 @@ salary_logic AS (
         m.sales_bulanan,
         m.hari_aktif,
 
-        :gapok AS gapok,
+        %(gapok)s AS gapok,
 
+        -- =========================
         -- KETERANGAN BONUS
+        -- =========================
         CASE
-            WHEN :use_flat_bonus
-                 AND b.sales >= :bonus_trigger
+            WHEN %(use_flat_bonus)s = 1
+                 AND b.sales >= %(bonus_trigger)s
                 THEN 'BONUS FLAT (HARIAN)'
 
-            WHEN :use_tier_bonus
-                 AND b.sales >= :tier_1_sales
+            WHEN %(use_tier_bonus)s = 1
+                 AND b.sales >= %(tier_1_sales)s
                 THEN 'BONUS JENJANG (HARIAN)'
 
-            WHEN :use_monthly_fixed
-                 AND m.sales_bulanan >= :monthly_sales_trigger
+            WHEN %(use_monthly_fixed)s = 1
+                 AND m.sales_bulanan >= %(monthly_sales_trigger)s
                 THEN 'BONUS FIXED (BULANAN)'
 
-            WHEN :use_monthly_tier
-                 AND m.sales_bulanan >= :monthly_tier_1_sales
+            WHEN %(use_monthly_tier)s = 1
+                 AND m.sales_bulanan >= %(monthly_tier_1_sales)s
                 THEN 'BONUS JENJANG (BULANAN)'
 
             ELSE 'TIDAK DAPAT BONUS'
         END AS keterangan_bonus,
 
+        -- =========================
         -- BONUS CREW UTAMA
+        -- =========================
         CASE
-            WHEN :use_flat_bonus
-                 AND b.sales >= :bonus_trigger
-                THEN :flat_bonus
+            -- CUSTOM 1 – FLAT HARIAN
+            WHEN %(use_flat_bonus)s = 1
+                 AND b.sales >= %(bonus_trigger)s
+                THEN %(flat_bonus)s
 
-            WHEN :use_tier_bonus
-                 AND b.sales >= :tier_3_sales
-                THEN b.sales * :tier_3_pct
+            -- CUSTOM 2 – JENJANG HARIAN
+            WHEN %(use_tier_bonus)s = 1
+                 AND b.sales >= %(tier_3_sales)s
+                THEN b.sales * %(tier_3_pct)s
 
-            WHEN :use_tier_bonus
-                 AND b.sales >= :tier_2_sales
-                THEN b.sales * :tier_2_pct
+            WHEN %(use_tier_bonus)s = 1
+                 AND b.sales >= %(tier_2_sales)s
+                THEN b.sales * %(tier_2_pct)s
 
-            WHEN :use_tier_bonus
-                 AND b.sales >= :tier_1_sales
-                THEN b.sales * :tier_1_pct
+            WHEN %(use_tier_bonus)s = 1
+                 AND b.sales >= %(tier_1_sales)s
+                THEN b.sales * %(tier_1_pct)s
 
-            WHEN :use_monthly_fixed
-                 AND m.sales_bulanan >= :monthly_sales_trigger
-                THEN :monthly_fixed_bonus / NULLIF(m.hari_aktif, 0)
+            -- CUSTOM 3 – FIXED BULANAN (DIALOKASI HARIAN)
+            WHEN %(use_monthly_fixed)s = 1
+                 AND m.sales_bulanan >= %(monthly_sales_trigger)s
+                THEN %(monthly_fixed_bonus)s / m.hari_aktif
 
-            WHEN :use_monthly_tier
-                 AND m.sales_bulanan >= :monthly_tier_3_sales
-                THEN (m.sales_bulanan * :monthly_tier_3_pct) / NULLIF(m.hari_aktif, 0)
+            -- CUSTOM 4 – JENJANG BULANAN (DIALOKASI HARIAN)
+            WHEN %(use_monthly_tier)s = 1
+                 AND m.sales_bulanan >= %(monthly_tier_3_sales)s
+                THEN (m.sales_bulanan * %(monthly_tier_3_pct)s) / m.hari_aktif
 
-            WHEN :use_monthly_tier
-                 AND m.sales_bulanan >= :monthly_tier_2_sales
-                THEN (m.sales_bulanan * :monthly_tier_2_pct) / NULLIF(m.hari_aktif, 0)
+            WHEN %(use_monthly_tier)s = 1
+                 AND m.sales_bulanan >= %(monthly_tier_2_sales)s
+                THEN (m.sales_bulanan * %(monthly_tier_2_pct)s) / m.hari_aktif
 
-            WHEN :use_monthly_tier
-                 AND m.sales_bulanan >= :monthly_tier_1_sales
-                THEN (m.sales_bulanan * :monthly_tier_1_pct) / NULLIF(m.hari_aktif, 0)
+            WHEN %(use_monthly_tier)s = 1
+                 AND m.sales_bulanan >= %(monthly_tier_1_sales)s
+                THEN (m.sales_bulanan * %(monthly_tier_1_pct)s) / m.hari_aktif
 
             ELSE 0
         END AS bonus_crew_utama
@@ -97,21 +104,17 @@ salary_logic AS (
         ON b.outlet = m.outlet
 ),
 
--- =========================
--- CREW PERBANTUAN
--- =========================
 crew_logic AS (
     SELECT
         *,
         CASE
-            WHEN NOT :use_perbantuan THEN 0
-            WHEN sales >= :crew_3_threshold THEN 3
-            WHEN sales >= :crew_2_threshold THEN 2
-            WHEN sales >= :crew_1_threshold THEN 1
+            WHEN %(use_perbantuan)s = 0 THEN 0
+            WHEN sales >= %(crew_3_threshold)s THEN 3
+            WHEN sales >= %(crew_2_threshold)s THEN 2
+            WHEN sales >= %(crew_1_threshold)s THEN 1
             ELSE 0
         END AS crew_perbantuan,
-
-        :gapok AS gaji_perbantuan
+        %(gapok)s AS gaji_perbantuan
     FROM salary_logic
 )
 
