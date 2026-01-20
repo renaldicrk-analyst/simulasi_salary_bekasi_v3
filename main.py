@@ -186,7 +186,7 @@ params = {
     "branch": branch,
     "start_date": start_date,
     "end_date": end_date,
-    "gapok": gapok,
+    "gapok": gapok, "gaji_perbantuan": gaji_perbantuan,
 
     "use_flat_bonus": 1 if mode_key == "custom_1" else 0,
     "use_tier_bonus": 1 if mode_key == "custom_2" else 0,
@@ -216,9 +216,7 @@ params = {
     "use_perbantuan": 1 if use_perbantuan else 0,
     "crew_1_threshold": crew_1_threshold,
     "crew_2_threshold": crew_2_threshold,
-    "crew_3_threshold": crew_3_threshold,
-    "gapok": gapok,
-    "gaji_perbantuan": gaji_perbantuan
+    "crew_3_threshold": crew_3_threshold
 }
 
 # LOAD DATA
