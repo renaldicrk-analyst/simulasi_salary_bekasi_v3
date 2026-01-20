@@ -262,7 +262,7 @@ if mode_key in ["custom_1", "custom_2"]:
                 "outlet",
                 "sales",
                 "keterangan_bonus",
-                "gapok", "gaji_perbantuan",
+                "gapok",
                 "bonus_crew_utama",
                 "crew_perbantuan",
                 "total_salary",
