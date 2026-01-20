@@ -186,8 +186,8 @@ params = {
     "branch": branch,
     "start_date": start_date,
     "end_date": end_date,
-    "gapok": gapok, "gaji_perbantuan": gaji_perbantuan,
-
+    "gapok": gapok,
+    "gaji_perbantuan": gaji_perbantuan,
     "use_flat_bonus": 1 if mode_key == "custom_1" else 0,
     "use_tier_bonus": 1 if mode_key == "custom_2" else 0,
     "use_monthly_fixed": 1 if mode_key == "custom_3" else 0,
@@ -265,7 +265,6 @@ if mode_key in ["custom_1", "custom_2"]:
                 "gapok",
                 "bonus_crew_utama",
                 "crew_perbantuan",
-                "total_gaji_perbantuan",
                 "total_salary",
             ]
         ],
