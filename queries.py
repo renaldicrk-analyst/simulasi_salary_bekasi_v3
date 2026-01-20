@@ -10,9 +10,8 @@ WITH base AS (
       AND tanggal BETWEEN :start_date AND :end_date
 ),
 
--- =========================
+
 -- AGGREGATE BULANAN
--- =========================
 monthly_sales AS (
     SELECT
         outlet,
@@ -22,9 +21,7 @@ monthly_sales AS (
     GROUP BY outlet
 ),
 
--- =========================
 -- LOGIC GAJI & BONUS
--- =========================
 salary_logic AS (
     SELECT
         b.tanggal,
@@ -35,9 +32,7 @@ salary_logic AS (
 
         :gapok AS gapok,
 
-        -- =========================
         -- KETERANGAN BONUS
-        -- =========================
         CASE
             WHEN :use_flat_bonus = 1
                  AND b.sales >= :bonus_trigger
@@ -58,9 +53,7 @@ salary_logic AS (
             ELSE 'TIDAK DAPAT BONUS'
         END AS keterangan_bonus,
 
-        -- =========================
         -- BONUS CREW UTAMA
-        -- =========================
         CASE
             -- CUSTOM 1 : FLAT HARIAN
             WHEN :use_flat_bonus = 1
@@ -105,9 +98,8 @@ salary_logic AS (
         ON b.outlet = m.outlet
 ),
 
--- =========================
+
 -- CREW PERBANTUAN
--- =========================
 crew_logic AS (
     SELECT
         *,

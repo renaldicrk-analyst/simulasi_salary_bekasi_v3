@@ -5,17 +5,13 @@ import pandas as pd
 from queries import SIMULATION_QUERY
 from db import fetch_dataframe
 
-# ======================================================
 # PAGE CONFIG
-# ======================================================
 st.set_page_config(page_title="Simulasi Penggajian", layout="wide")
 st.title("Simulasi Penggajian")
 
 branch = "Jakarta"
 
-# ======================================================
 # SIDEBAR – PILIH SKEMA
-# ======================================================
 st.sidebar.header("Skema Penggajian")
 
 mode_label = st.sidebar.radio(
@@ -37,30 +33,23 @@ mode_key = {
 
 st.sidebar.divider()
 
-# ======================================================
 # JUMLAH HARI
-# ======================================================
 days = st.sidebar.slider("Jumlah Hari Kerja", 1, 31, 26)
 start_date = dt.date(2025, 11, 1)
 end_date = start_date + dt.timedelta(days=days - 1)
 
-# ======================================================
 # GAPOK CREW UTAMA
-# ======================================================
 gapok = st.sidebar.number_input("Gapok Crew Utama / Hari", value=90_000, step=5_000)
 
-# ======================================================
 # GAPOK CREW PERBANTUAN (BARU)
-# ======================================================
 gaji_perbantuan_custom = st.sidebar.number_input(
     "Gapok Crew Perbantuan / Hari",
     value=90_000,
     step=5_000
 )
 
-# ======================================================
+
 # DEFAULT PARAM (ANTI SQL ERROR)
-# ======================================================
 bonus_trigger = flat_bonus = 0
 tier_1_sales = tier_2_sales = tier_3_sales = 0
 tier_1_pct = tier_2_pct = tier_3_pct = 0.0
@@ -69,9 +58,7 @@ monthly_sales_trigger = monthly_fixed_bonus = 0
 monthly_tier_1_sales = monthly_tier_2_sales = monthly_tier_3_sales = 0
 monthly_tier_1_pct = monthly_tier_2_pct = monthly_tier_3_pct = 0.0
 
-# ======================================================
 # SETTING BONUS
-# ======================================================
 if mode_key == "custom_1":
     bonus_trigger = st.sidebar.number_input("Target Sales Bonus", value=1_000_000)
     flat_bonus = st.sidebar.number_input("Bonus / Hari", value=60_000)
@@ -96,9 +83,7 @@ elif mode_key == "custom_4":
     monthly_tier_3_sales = st.sidebar.number_input("Tier 3 ≥", value=60_000_000)
     monthly_tier_3_pct = st.sidebar.number_input("Bonus % Tier 3", value=0.10, step=0.01)
 
-# ======================================================
 # CREW PERBANTUAN
-# ======================================================
 st.sidebar.divider()
 use_perbantuan = st.sidebar.checkbox("Gunakan Crew Perbantuan", value=True)
 
@@ -183,9 +168,7 @@ else:
     )
 
 
-# ======================================================
 # PARAMS SQL (QUERY TIDAK DIUBAH)
-# ======================================================
 params = {
     "branch": branch,
     "start_date": start_date,
@@ -223,17 +206,13 @@ params = {
     "crew_3_threshold": crew_3_threshold,
 }
 
-# ======================================================
 # LOAD DATA
-# ======================================================
 df = fetch_dataframe(SIMULATION_QUERY, params)
 if df.empty:
     st.warning("Data kosong")
     st.stop()
 
-# ======================================================
 # OVERRIDE GAJI PERBANTUAN (POST SQL)
-# ======================================================
 df["total_gaji_perbantuan"] = df["crew_perbantuan"] * gaji_perbantuan_custom
 df["total_salary"] = (
     df["gapok"]
@@ -241,9 +220,7 @@ df["total_salary"] = (
     + df["total_gaji_perbantuan"]
 )
 
-# ======================================================
-# ================= CUSTOM 1 & 2 ========================
-# ======================================================
+# CUSTOM 1 & 2
 if mode_key in ["custom_1", "custom_2"]:
 
     st.subheader("Range Total Salary")
@@ -290,9 +267,7 @@ if mode_key in ["custom_1", "custom_2"]:
         use_container_width=True,
     )
 
-# ======================================================
-# ================= CUSTOM 3 & 4 ========================
-# ======================================================
+# CUSTOM 3 & 4 
 else:
     st.subheader("Ringkasan Bonus Bulanan")
 
