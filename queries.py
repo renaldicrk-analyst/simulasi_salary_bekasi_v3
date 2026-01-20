@@ -10,8 +10,9 @@ WITH base AS (
       AND tanggal BETWEEN :start_date AND :end_date
 ),
 
-
+-- =========================
 -- AGGREGATE BULANAN
+-- =========================
 monthly_sales AS (
     SELECT
         outlet,
@@ -21,7 +22,9 @@ monthly_sales AS (
     GROUP BY outlet
 ),
 
+-- =========================
 -- LOGIC GAJI & BONUS
+-- =========================
 salary_logic AS (
     SELECT
         b.tanggal,
@@ -34,19 +37,19 @@ salary_logic AS (
 
         -- KETERANGAN BONUS
         CASE
-            WHEN :use_flat_bonus = 1
+            WHEN :use_flat_bonus
                  AND b.sales >= :bonus_trigger
                 THEN 'BONUS FLAT (HARIAN)'
 
-            WHEN :use_tier_bonus = 1
+            WHEN :use_tier_bonus
                  AND b.sales >= :tier_1_sales
                 THEN 'BONUS JENJANG (HARIAN)'
 
-            WHEN :use_monthly_fixed = 1
+            WHEN :use_monthly_fixed
                  AND m.sales_bulanan >= :monthly_sales_trigger
                 THEN 'BONUS FIXED (BULANAN)'
 
-            WHEN :use_monthly_tier = 1
+            WHEN :use_monthly_tier
                  AND m.sales_bulanan >= :monthly_tier_1_sales
                 THEN 'BONUS JENJANG (BULANAN)'
 
@@ -55,41 +58,37 @@ salary_logic AS (
 
         -- BONUS CREW UTAMA
         CASE
-            -- CUSTOM 1 : FLAT HARIAN
-            WHEN :use_flat_bonus = 1
+            WHEN :use_flat_bonus
                  AND b.sales >= :bonus_trigger
                 THEN :flat_bonus
 
-            -- CUSTOM 2 : JENJANG HARIAN
-            WHEN :use_tier_bonus = 1
+            WHEN :use_tier_bonus
                  AND b.sales >= :tier_3_sales
                 THEN b.sales * :tier_3_pct
 
-            WHEN :use_tier_bonus = 1
+            WHEN :use_tier_bonus
                  AND b.sales >= :tier_2_sales
                 THEN b.sales * :tier_2_pct
 
-            WHEN :use_tier_bonus = 1
+            WHEN :use_tier_bonus
                  AND b.sales >= :tier_1_sales
                 THEN b.sales * :tier_1_pct
 
-            -- CUSTOM 3 : FIXED BULANAN (DIBAGI HARI AKTIF)
-            WHEN :use_monthly_fixed = 1
+            WHEN :use_monthly_fixed
                  AND m.sales_bulanan >= :monthly_sales_trigger
-                THEN :monthly_fixed_bonus / m.hari_aktif
+                THEN :monthly_fixed_bonus / NULLIF(m.hari_aktif, 0)
 
-            -- CUSTOM 4 : JENJANG BULANAN (DIBAGI HARI AKTIF)
-            WHEN :use_monthly_tier = 1
+            WHEN :use_monthly_tier
                  AND m.sales_bulanan >= :monthly_tier_3_sales
-                THEN (m.sales_bulanan * :monthly_tier_3_pct) / m.hari_aktif
+                THEN (m.sales_bulanan * :monthly_tier_3_pct) / NULLIF(m.hari_aktif, 0)
 
-            WHEN :use_monthly_tier = 1
+            WHEN :use_monthly_tier
                  AND m.sales_bulanan >= :monthly_tier_2_sales
-                THEN (m.sales_bulanan * :monthly_tier_2_pct) / m.hari_aktif
+                THEN (m.sales_bulanan * :monthly_tier_2_pct) / NULLIF(m.hari_aktif, 0)
 
-            WHEN :use_monthly_tier = 1
+            WHEN :use_monthly_tier
                  AND m.sales_bulanan >= :monthly_tier_1_sales
-                THEN (m.sales_bulanan * :monthly_tier_1_pct) / m.hari_aktif
+                THEN (m.sales_bulanan * :monthly_tier_1_pct) / NULLIF(m.hari_aktif, 0)
 
             ELSE 0
         END AS bonus_crew_utama
@@ -98,13 +97,14 @@ salary_logic AS (
         ON b.outlet = m.outlet
 ),
 
-
+-- =========================
 -- CREW PERBANTUAN
+-- =========================
 crew_logic AS (
     SELECT
         *,
         CASE
-            WHEN :use_perbantuan = 0 THEN 0
+            WHEN NOT :use_perbantuan THEN 0
             WHEN sales >= :crew_3_threshold THEN 3
             WHEN sales >= :crew_2_threshold THEN 2
             WHEN sales >= :crew_1_threshold THEN 1
