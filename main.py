@@ -72,6 +72,8 @@ monthly_tier_1_sales = monthly_tier_2_sales = monthly_tier_3_sales = 0
 monthly_tier_1_pct = monthly_tier_2_pct = monthly_tier_3_pct = 0.0
 
 custom_5_bonus = 0  # 🔹 TAMBAHAN
+c5_tier_1_ach = c5_tier_2_ach = c5_tier_3_ach = 0.0
+c5_tier_1_pct = c5_tier_2_pct = c5_tier_3_pct = 0.0
 
 
 # SETTING BONUS
@@ -100,11 +102,43 @@ elif mode_key == "custom_4":
     monthly_tier_3_sales = st.sidebar.number_input("Tier 3 ≥", value=60_000_000)
     monthly_tier_3_pct = st.sidebar.number_input("Bonus % Tier 3", value=0.10, step=0.005)
 
-elif mode_key == "custom_5":  # 🔹 TAMBAHAN
-    custom_5_bonus = st.sidebar.number_input(
-        "Bonus Bulanan (Jika Achieve Target Outlet)",
-        value=1_500_000
+elif mode_key == "custom_5":
+
+    st.sidebar.markdown("### Tier Achievement & Bonus %")
+
+    c5_tier_1_ach = st.sidebar.number_input(
+        "Achieve ≥",
+        value=1.00,
+        step=0.05
     )
+    c5_tier_1_pct = st.sidebar.number_input(
+        "Bonus %",
+        value=0.04,
+        step=0.005
+    )
+
+    c5_tier_2_ach = st.sidebar.number_input(
+        "Achieve ≥ ",
+        value=1.10,
+        step=0.05
+    )
+    c5_tier_2_pct = st.sidebar.number_input(
+        "Bonus % ",
+        value=0.05,
+        step=0.005
+    )
+
+    c5_tier_3_ach = st.sidebar.number_input(
+        "Achieve ≥  ",
+        value=1.20,
+        step=0.05
+    )
+    c5_tier_3_pct = st.sidebar.number_input(
+        "Bonus %  ",
+        value=0.06,
+        step=0.005
+    )
+
 
 
 # CREW PERBANTUAN
@@ -245,6 +279,12 @@ params = {
     "monthly_tier_3_pct": monthly_tier_3_pct,
 
     "custom_5_bonus": custom_5_bonus,  # 🔹 TAMBAHAN
+    "c5_tier_1_ach": c5_tier_1_ach,
+    "c5_tier_2_ach": c5_tier_2_ach,
+    "c5_tier_3_ach": c5_tier_3_ach,
+    "c5_tier_1_pct": c5_tier_1_pct,
+    "c5_tier_2_pct": c5_tier_2_pct,
+    "c5_tier_3_pct": c5_tier_3_pct,
 
     "use_perbantuan": 1 if use_perbantuan else 0,
     "crew_1_threshold": crew_1_threshold,
