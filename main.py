@@ -375,14 +375,14 @@ else:
     c1.metric("Total Outlet", total_outlet)
     c2.metric("Outlet Achieve Target", achieved_outlet)
     c3.metric("% Achieve Target", f"{achievement_pct:.1%}")
-    c4.metric(
-        "Total Bonus Bulanan",
-        f"Rp {achieved['bonus'].sum():,.0f}",
-    )
-    c5.metric("Total Sales", f"Rp {total_sales:,.0f}")
+    # c4.metric(
+    #     "Total Bonus Bulanan",
+    #     f"Rp {achieved['bonus'].sum():,.0f}",
+    # )
+    c4.metric("Total Sales", f"Rp {total_sales:,.0f}")
     total_salary = total_salary_without_bonus + achieved["bonus"].sum()
 
-    c6.metric(
+    c5.metric(
         "Total Salary",
         f"Rp {total_salary:,.0f}"
     )
