@@ -25,7 +25,7 @@ mode_label = st.sidebar.radio(
         "Custom 2 – Bonus Berjenjang Harian",
         "Custom 3 – Bonus Fixed Bulanan",
         "Custom 4 – Bonus Berjenjang Bulanan",
-        "Custom 5 – Bonus Bulanan Target Outlet",
+        "Custom 5 – Bonus Target Bulanan Outlet",  # 🔹 TAMBAHAN
     ]
 )
 
@@ -34,13 +34,10 @@ mode_key = {
     "Custom 2 – Bonus Berjenjang Harian": "custom_2",
     "Custom 3 – Bonus Fixed Bulanan": "custom_3",
     "Custom 4 – Bonus Berjenjang Bulanan": "custom_4",
-    "Custom 5 – Bonus Bulanan Target Outlet": "custom_5",
+    "Custom 5 – Bonus Target Bulanan Outlet": "custom_5",  # 🔹 TAMBAHAN
 }[mode_label]
 
 st.sidebar.divider()
-
-# Default Param
-monthly_target_pct = 0.0
 
 
 # JUMLAH HARI
@@ -64,7 +61,6 @@ gaji_perbantuan = st.sidebar.number_input(
 )
 
 
-
 # DEFAULT PARAM (ANTI SQL ERROR)
 
 bonus_trigger = flat_bonus = 0
@@ -74,6 +70,8 @@ tier_1_pct = tier_2_pct = tier_3_pct = 0.0
 monthly_sales_trigger = monthly_fixed_bonus = 0
 monthly_tier_1_sales = monthly_tier_2_sales = monthly_tier_3_sales = 0
 monthly_tier_1_pct = monthly_tier_2_pct = monthly_tier_3_pct = 0.0
+
+custom_5_bonus = 0  # 🔹 TAMBAHAN
 
 
 # SETTING BONUS
@@ -101,13 +99,12 @@ elif mode_key == "custom_4":
     monthly_tier_2_pct = st.sidebar.number_input("Bonus % Tier 2", value=0.08, step=0.005)
     monthly_tier_3_sales = st.sidebar.number_input("Tier 3 ≥", value=60_000_000)
     monthly_tier_3_pct = st.sidebar.number_input("Bonus % Tier 3", value=0.10, step=0.005)
-elif mode_key == "custom_5":
-    monthly_target_pct = st.sidebar.number_input(
-    "Bonus (% dari Target Outlet)",
-    value=0.05,
-    step=0.01,
-    format="%.2f")
 
+elif mode_key == "custom_5":  # 🔹 TAMBAHAN
+    custom_5_bonus = st.sidebar.number_input(
+        "Bonus Bulanan (Jika Achieve Target Outlet)",
+        value=1_500_000
+    )
 
 
 # CREW PERBANTUAN
@@ -117,6 +114,7 @@ use_perbantuan = st.sidebar.checkbox("Gunakan Crew Perbantuan", value=True)
 crew_1_threshold = st.sidebar.number_input("Sales ≥ +1 Crew", value=1_700_000)
 crew_2_threshold = st.sidebar.number_input("Sales ≥ +2 Crew", value=2_700_000)
 crew_3_threshold = st.sidebar.number_input("Sales ≥ +3 Crew", value=3_700_000)
+
 
 # DESKRIPSI SKEMA
 if mode_key == "custom_1":
@@ -174,32 +172,8 @@ elif mode_key == "custom_3":
         {"Aktif (berdasarkan threshold sales harian)" if use_perbantuan else "Tidak digunakan"}
         """
     )
-elif mode_key == "custom_5":
-    st.info(
-        f"""
-        **Skema Custom 5 – Bonus Bulanan Berbasis Target Outlet (%)**
 
-        - Gapok dibayar **harian**
-        - Bonus diberikan **bulanan (sekali bayar)**
-        - Target **berbeda untuk setiap outlet**
-        - Target diambil dari **master_target (November 2025)**
-
-        **Syarat Bonus:**
-        - Sales bulanan outlet **≥ target outlet**
-
-        **Rumus Bonus:**
-        > Bonus Bulanan = Target Outlet × **{monthly_target_pct:.0%}**
-
-        **Catatan:**
-        - Bonus **tidak dibagi harian**
-        - Bonus dibayarkan **1x per outlet** meskipun data bersifat harian
-
-        **Crew Perbantuan:**  
-        {"Aktif (berdasarkan threshold sales harian)" if use_perbantuan else "Tidak digunakan"}
-        """
-    )
-
-else:
+elif mode_key == "custom_4":
     st.info(
         f"""
         **Skema Custom 4 – Bonus Berjenjang Bulanan**
@@ -218,6 +192,25 @@ else:
         """
     )
 
+else:  # 🔹 CUSTOM 5
+    st.info(
+        f"""
+        **Skema Custom 5 – Bonus Target Bulanan per Outlet**
+
+        - Gapok dibayar **harian**
+        - Bonus **bulanan per outlet**
+        - Target **berbeda tiap outlet** (master_target Nov 2025)
+        - Bonus dibagi rata ke hari aktif outlet
+
+        **Bonus Bulanan:**
+        Rp {custom_5_bonus:,.0f} / outlet (jika achieve)
+
+        **Crew Perbantuan:**  
+        {"Aktif (berdasarkan threshold sales harian)" if use_perbantuan else "Tidak digunakan"}
+        """
+    )
+
+
 # PARAMS SQL
 params = {
     "branch": branch,
@@ -229,6 +222,7 @@ params = {
     "use_tier_bonus": 1 if mode_key == "custom_2" else 0,
     "use_monthly_fixed": 1 if mode_key == "custom_3" else 0,
     "use_monthly_tier": 1 if mode_key == "custom_4" else 0,
+    "use_custom_5": 1 if mode_key == "custom_5" else 0,  # 🔹 TAMBAHAN
 
     "bonus_trigger": bonus_trigger,
     "flat_bonus": flat_bonus,
@@ -250,17 +244,21 @@ params = {
     "monthly_tier_2_pct": monthly_tier_2_pct,
     "monthly_tier_3_pct": monthly_tier_3_pct,
 
+    "custom_5_bonus": custom_5_bonus,  # 🔹 TAMBAHAN
+
     "use_perbantuan": 1 if use_perbantuan else 0,
     "crew_1_threshold": crew_1_threshold,
     "crew_2_threshold": crew_2_threshold,
     "crew_3_threshold": crew_3_threshold
 }
 
+
 # LOAD DATA
 df = fetch_dataframe(SIMULATION_QUERY, params)
 if df.empty:
     st.warning("Data kosong")
     st.stop()
+
 
 # ================= CUSTOM 1 & 2 ========================
 if mode_key in ["custom_1", "custom_2"]:
@@ -308,7 +306,8 @@ if mode_key in ["custom_1", "custom_2"]:
         use_container_width=True,
     )
 
-# ================= CUSTOM 3 & 4 ========================
+
+# ================= CUSTOM 3, 4 & 5 ========================
 else:
     st.subheader("Ringkasan Bonus Bulanan")
 
@@ -320,12 +319,9 @@ else:
 
     achieved = bonus_df[bonus_df["bonus"] > 0]
 
-    
-    # HITUNG INFO ADDITIONAL
-    
-    total_outlet = df["outlet"].nunique()                      # total outlet unik
-    achieved_outlet = achieved["outlet"].nunique()            # outlet yang achieve
-    achievement_pct = (achieved_outlet / total_outlet) if total_outlet > 0 else 0  # persentase
+    total_outlet = df["outlet"].nunique()
+    achieved_outlet = achieved["outlet"].nunique()
+    achievement_pct = (achieved_outlet / total_outlet) if total_outlet > 0 else 0
 
     total_sales = df["sales"].sum()
     total_salary_without_bonus = df["total_salary"].sum()
@@ -358,4 +354,3 @@ else:
         ],
         use_container_width=True,
     )
-
