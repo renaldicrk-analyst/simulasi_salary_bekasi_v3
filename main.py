@@ -348,14 +348,29 @@ if mode_key in ["custom_1", "custom_2"]:
 
 
 # ================= CUSTOM 3, 4 & 5 ========================
+# ================= CUSTOM 3, 4 & 5 ========================
 else:
     st.subheader("Ringkasan Bonus Bulanan")
 
-    bonus_df = (
-        df.groupby("outlet")
-        .agg(sales_bulanan=("sales", "sum"), bonus=("bonus_crew_utama", "sum"))
-        .reset_index()
-    )
+    # 🔥 BEDAIN AGREGASI KHUSUS CUSTOM 5
+    if mode_key == "custom_5":
+        bonus_df = (
+            df.groupby("outlet")
+            .agg(
+                sales_bulanan=("sales", "sum"),
+                bonus=("bonus_crew_utama", "max")  # ✅ KUNCI FIX CUSTOM 5
+            )
+            .reset_index()
+        )
+    else:
+        bonus_df = (
+            df.groupby("outlet")
+            .agg(
+                sales_bulanan=("sales", "sum"),
+                bonus=("bonus_crew_utama", "sum")  # ✅ TETAP UNTUK CUSTOM 3 & 4
+            )
+            .reset_index()
+        )
 
     achieved = bonus_df[bonus_df["bonus"] > 0]
 
