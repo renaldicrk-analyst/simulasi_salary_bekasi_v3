@@ -300,21 +300,34 @@ params = {
 }
 
 
-# ======================================================
 # LOAD DATA
-# ======================================================
 df = fetch_dataframe(SIMULATION_QUERY, params)
 
 if df.empty:
     st.warning("Data kosong")
     st.stop()
 
-
-# ======================================================
-# CUSTOM 1 & 2
-# ======================================================
+# ================= CUSTOM 1 & 2 ========================
 if mode_key in ["custom_1", "custom_2"]:
-    st.subheader("Ringkasan")
+
+    st.subheader("Range Total Salary")
+    min_salary = gapok * days
+    max_salary = (gapok + df["bonus_crew_utama"].max()) * days
+
+    c1, c2 = st.columns(2)
+    c1.metric("Minimum", f"Rp {min_salary:,.0f}")
+    c2.metric("Maksimum", f"Rp {max_salary:,.0f}")
+
+    st.subheader("Distribusi Bonus")
+    dist = df["keterangan_bonus"].value_counts().reset_index()
+    dist.columns = ["Status Bonus", "Jumlah Hari"]
+    dist["Persentase"] = (
+        dist["Jumlah Hari"] / dist["Jumlah Hari"].sum()
+    ).round(2)
+
+    st.dataframe(dist, use_container_width=True)
+
+    st.subheader("Ringkasan Total")
     total_sales = df["sales"].sum()
     total_salary = df["total_salary"].sum()
     total_bonus = df["bonus_crew_utama"].sum()
@@ -324,15 +337,30 @@ if mode_key in ["custom_1", "custom_2"]:
     c2.metric("Total Salary", f"Rp {total_salary:,.0f}")
     c3.metric("Total Bonus", f"Rp {total_bonus:,.0f}")
 
-    st.dataframe(df, use_container_width=True)
+    st.metric("Salary Cost", f"{total_salary / total_sales:.2%}")
 
+    st.subheader("Detail Harian")
+    st.dataframe(
+        df[
+            [
+                "tanggal",
+                "outlet",
+                "sales",
+                "keterangan_bonus",
+                "gapok",
+                "total_gaji_perbantuan",
+                "bonus_crew_utama",
+                "crew_perbantuan",
+                "total_salary",
+            ]
+        ],
+        use_container_width=True,
+    )
 
-# ======================================================
-# CUSTOM 3, 4 & 5
-# ======================================================
+# ================= CUSTOM 3, 4 & 5 ========================
 else:
-    st.subheader("Ringkasan Bonus Bulanan")
 
+    st.subheader("Ringkasan Bonus Bulanan")
     bonus_df = (
         df.groupby("outlet")
         .agg(
@@ -342,4 +370,50 @@ else:
         .reset_index()
     )
 
-    st.dataframe(bonus_df, use_container_width=True)
+    achieved = bonus_df[bonus_df["bonus"] > 0]
+
+    total_outlet = df["outlet"].nunique()
+    achieved_outlet = achieved["outlet"].nunique()
+    achievement_pct = (
+        achieved_outlet / total_outlet if total_outlet > 0 else 0
+    )
+
+    total_sales = df["sales"].sum()
+    total_salary_without_bonus = df["total_salary"].sum()
+
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1.metric("Total Outlet", total_outlet)
+    c2.metric("Outlet Achieve Target", achieved_outlet)
+    c3.metric("% Achieve Target", f"{achievement_pct:.1%}")
+    c4.metric(
+        "Total Bonus Bulanan",
+        f"Rp {achieved['bonus'].sum():,.0f}",
+    )
+    c5.metric("Total Sales", f"Rp {total_sales:,.0f}")
+    c6.metric(
+        "Total Salary (Tanpa Bonus)",
+        f"Rp {total_salary_without_bonus:,.0f}",
+    )
+
+    total_salary = total_salary_without_bonus + achieved["bonus"].sum()
+    st.metric("Salary Cost", f"{total_salary / total_sales:.2%}")
+
+    st.subheader("Detail Harian (Tanpa Bonus)")
+    df["total_salary_harian"] = (
+        df["gapok"] + df["total_gaji_perbantuan"]
+    )
+
+    st.dataframe(
+        df[
+            [
+                "tanggal",
+                "outlet",
+                "sales",
+                "gapok",
+                "crew_perbantuan",
+                "total_gaji_perbantuan",
+                "total_salary_harian",
+            ]
+        ],
+        use_container_width=True,
+    )

@@ -45,7 +45,7 @@ salary_logic AS (
         b.sales,
         m.sales_bulanan,
         m.hari_aktif,
-        t.target AS target_bulanan, (m.sales_bulanan / NULLIF(t.target, 0)) * 100 AS achievement_pct,
+        t.target AS target_bulanan,
 
         %(gapok)s AS gapok,
 
