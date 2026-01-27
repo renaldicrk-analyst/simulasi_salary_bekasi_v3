@@ -42,6 +42,10 @@ salary_logic AS (
         m.hari_aktif,
         t.target AS target_bulanan,
         (m.sales_bulanan / NULLIF(t.target, 0)) * 100 AS achievement_pct,
+        ROW_NUMBER() OVER (
+        PARTITION BY b.outlet
+        ORDER BY b.tanggal
+        ) AS rn
 
         %(gapok)s AS gapok,
 

@@ -256,7 +256,7 @@ params = {
     "monthly_tier_2_pct": monthly_tier_2_pct,
     "monthly_tier_3_pct": monthly_tier_3_pct,
 
-    # 🔹 CUSTOM 5 – ACHIEVEMENT BASED
+    # CUSTOM 5 – ACHIEVEMENT BASED
     "achv_1_pct": achv_1_pct,
     "achv_2_pct": achv_2_pct,
     "achv_3_pct": achv_3_pct,
