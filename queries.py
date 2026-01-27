@@ -126,20 +126,17 @@ salary_logic AS (
                 THEN %(custom_5_bonus)s / m.hari_aktif
             
             -- CUSTOM 6 – ACHIEVEMENT TARGET BULANAN (DIALOKASI HARIAN)
-            -- CUSTOM 6 – ACHIEVEMENT TARGET BULANAN
             WHEN %(use_custom_6)s = 1
-            AND (m.sales_bulanan / NULLIF(t.target, 0)) >= %(achv_3)s
-            THEN m.sales_bulanan * %(achv_3_pct)s
-
+                AND (m.sales_bulanan / NULLIF(t.target,0)) >= %(achv_tier_3)s
+            THEN (m.sales_bulanan * %(achv_tier_3_pct)s) / m.hari_aktif
 
             WHEN %(use_custom_6)s = 1
-            AND (m.sales_bulanan / NULLIF(t.target, 0)) >= %(achv_2)s
-            THEN m.sales_bulanan * %(achv_2_pct)s
-
+                AND (m.sales_bulanan / NULLIF(t.target,0)) >= %(achv_tier_2)s
+            THEN (m.sales_bulanan * %(achv_tier_2_pct)s) / m.hari_aktif
 
             WHEN %(use_custom_6)s = 1
-            AND (m.sales_bulanan / NULLIF(t.target, 0)) >= %(achv_1)s
-            THEN m.sales_bulanan * %(achv_1_pct)s
+                AND (m.sales_bulanan / NULLIF(t.target,0)) >= %(achv_tier_1)s
+            THEN (m.sales_bulanan * %(achv_tier_1_pct)s) / m.hari_aktif
 
 
             ELSE 0
