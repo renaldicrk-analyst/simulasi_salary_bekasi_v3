@@ -139,9 +139,28 @@ elif mode_key == "custom_4":
     )
 
 elif mode_key == "custom_5":
-    custom_5_bonus = st.sidebar.number_input(
-        "Bonus Bulanan (Jika Achieve Target Outlet)",
-        value=1_500_000
+
+    st.sidebar.markdown("### Tier Achievement")
+
+    achv_1 = st.sidebar.number_input(
+        "Tier 1 Achievement ≥ (%)", value=100, step=5
+    )
+    achv_1_pct = st.sidebar.number_input(
+        "Bonus % Tier 1", value=0.02, step=0.005
+    )
+
+    achv_2 = st.sidebar.number_input(
+        "Tier 2 Achievement ≥ (%)", value=110, step=5
+    )
+    achv_2_pct = st.sidebar.number_input(
+        "Bonus % Tier 2", value=0.03, step=0.005
+    )
+
+    achv_3 = st.sidebar.number_input(
+        "Tier 3 Achievement ≥ (%)", value=120, step=5
+    )
+    achv_3_pct = st.sidebar.number_input(
+        "Bonus % Tier 3", value=0.04, step=0.005
     )
 
 
@@ -241,18 +260,20 @@ elif mode_key == "custom_4":
 
 else:  # 🔹 CUSTOM 5
     st.info(
-        f"""
-**Skema Custom 5 – Bonus Target Bulanan per Outlet**
+    f"""
+**Skema Custom 5 – Bonus Achievement Bulanan Outlet**
 - Gapok dibayar **harian**
-- Bonus **bulanan per outlet**
-- Target **berbeda tiap outlet** (master_target Nov 2025)
-- Bonus dibagi rata ke hari aktif outlet
+- Bonus dihitung dari **achievement terhadap target outlet**
+- Bonus dibayarkan **bulanan (tidak dialokasikan harian)**
 
-**Bonus Bulanan:** Rp {custom_5_bonus:,.0f} / outlet (jika achieve)
+**Tier Bonus:**
+- ≥ {achv_1}% → **{achv_1_pct:.1%} × Sales Bulanan**
+- ≥ {achv_2}% → **{achv_2_pct:.1%} × Sales Bulanan**
+- ≥ {achv_3}% → **{achv_3_pct:.1%} × Sales Bulanan**
 
-**Crew Perbantuan:** {"Aktif (berdasarkan threshold sales harian)" if use_perbantuan else "Tidak digunakan"}
+**Crew Perbantuan:** {"Aktif" if use_perbantuan else "Tidak digunakan"}
 """
-    )
+)
 
 
 # ======================================================
@@ -292,6 +313,13 @@ params = {
     "monthly_tier_3_pct": monthly_tier_3_pct,
 
     "custom_5_bonus": custom_5_bonus,
+    "achv_1": achv_1,
+    "achv_2": achv_2,
+    "achv_3": achv_3,
+
+    "achv_1_pct": achv_1_pct,
+    "achv_2_pct": achv_2_pct,
+    "achv_3_pct": achv_3_pct,
 
     "use_perbantuan": 1 if use_perbantuan else 0,
     "crew_1_threshold": crew_1_threshold,
