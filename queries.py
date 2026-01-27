@@ -63,11 +63,12 @@ salary_logic AS (
                  AND m.sales_bulanan >= %(monthly_tier_1_sales)s
                 THEN 'BONUS JENJANG (BULANAN)'
 
+            ELSE 'TIDAK DAPAT BONUS'
+            
             WHEN %(use_monthly_target)s = 1
                 AND m.sales_bulanan >= t.target
                 THEN 'BONUS TARGET OUTLET (%)'
 
-            ELSE 'TIDAK DAPAT BONUS'
 
         END AS keterangan_bonus,
 
