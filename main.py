@@ -25,6 +25,7 @@ mode_label = st.sidebar.radio(
         "Custom 2 – Bonus Berjenjang Harian",
         "Custom 3 – Bonus Fixed Bulanan",
         "Custom 4 – Bonus Berjenjang Bulanan",
+        "Custom 5 – Bonus Bulanan Target Outlet",
     ]
 )
 
@@ -33,9 +34,13 @@ mode_key = {
     "Custom 2 – Bonus Berjenjang Harian": "custom_2",
     "Custom 3 – Bonus Fixed Bulanan": "custom_3",
     "Custom 4 – Bonus Berjenjang Bulanan": "custom_4",
+    "Custom 5 – Bonus Bulanan Target Outlet": "custom_5",
 }[mode_label]
 
 st.sidebar.divider()
+
+# Default Param
+monthly_target_pct = 0.0
 
 
 # JUMLAH HARI
@@ -96,6 +101,14 @@ elif mode_key == "custom_4":
     monthly_tier_2_pct = st.sidebar.number_input("Bonus % Tier 2", value=0.08, step=0.005)
     monthly_tier_3_sales = st.sidebar.number_input("Tier 3 ≥", value=60_000_000)
     monthly_tier_3_pct = st.sidebar.number_input("Bonus % Tier 3", value=0.10, step=0.005)
+elif mode_key == "custom_5":
+    monthly_target_pct = st.sidebar.number_input(
+    "Bonus (% dari Target Outlet)",
+    value=0.05,
+    step=0.01,
+    format="%.2f")
+
+
 
 # CREW PERBANTUAN
 st.sidebar.divider()
@@ -156,6 +169,30 @@ elif mode_key == "custom_3":
 
         **Target Bulanan:**  
         ≥ Rp {monthly_sales_trigger:,.0f} → Bonus **Rp {monthly_fixed_bonus:,.0f}**
+
+        **Crew Perbantuan:**  
+        {"Aktif (berdasarkan threshold sales harian)" if use_perbantuan else "Tidak digunakan"}
+        """
+    )
+elif mode_key == "custom_5":
+    st.info(
+        f"""
+        **Skema Custom 5 – Bonus Bulanan Berbasis Target Outlet (%)**
+
+        - Gapok dibayar **harian**
+        - Bonus diberikan **bulanan (sekali bayar)**
+        - Target **berbeda untuk setiap outlet**
+        - Target diambil dari **master_target (November 2025)**
+
+        **Syarat Bonus:**
+        - Sales bulanan outlet **≥ target outlet**
+
+        **Rumus Bonus:**
+        > Bonus Bulanan = Target Outlet × **{monthly_target_pct:.0%}**
+
+        **Catatan:**
+        - Bonus **tidak dibagi harian**
+        - Bonus dibayarkan **1x per outlet** meskipun data bersifat harian
 
         **Crew Perbantuan:**  
         {"Aktif (berdasarkan threshold sales harian)" if use_perbantuan else "Tidak digunakan"}

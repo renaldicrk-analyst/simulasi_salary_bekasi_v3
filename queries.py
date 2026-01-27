@@ -24,6 +24,15 @@ monthly_sales AS (
     GROUP BY outlet
 ),
 
+-- TAMBAHAN CTE TARGET BULANAN PER OUTLET
+monthly_target AS (
+    SELECT
+        outlet_tag_clean AS outlet,
+        target
+    FROM master_target
+    WHERE tanggal_penjualan = '2025-11-01'
+),
+
 salary_logic AS (
     SELECT
         b.tanggal,
@@ -55,6 +64,12 @@ salary_logic AS (
                 THEN 'BONUS JENJANG (BULANAN)'
 
             ELSE 'TIDAK DAPAT BONUS'
+            
+            WHEN %(use_monthly_target)s = 1
+                AND m.sales_bulanan >= t.target
+                THEN 'BONUS TARGET OUTLET (%)'
+
+
         END AS keterangan_bonus,
 
         
@@ -96,12 +111,22 @@ salary_logic AS (
             WHEN %(use_monthly_tier)s = 1
                  AND m.sales_bulanan >= %(monthly_tier_1_sales)s
                 THEN (m.sales_bulanan * %(monthly_tier_1_pct)s) / m.hari_aktif
+            
+            -- CUSTOM 5 - BONUS BASED ON TARGET BULANAN OUTLET
+            WHEN %(use_monthly_target)s = 1
+                AND m.sales_bulanan >= t.target
+                THEN (t.target * %(monthly_target_pct)s) / m.hari_aktif
+
+
+
 
             ELSE 0
         END AS bonus_crew_utama
     FROM base b
     LEFT JOIN monthly_sales m
         ON b.outlet = m.outlet
+    LEFT JOIN monthly_target t
+        ON b.outlet = t.outlet
 ),
 
 crew_logic AS (
@@ -118,6 +143,8 @@ crew_logic AS (
 
     FROM salary_logic
 )
+
+
 
 SELECT
     tanggal,
