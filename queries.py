@@ -68,8 +68,9 @@ salary_logic AS (
                 THEN 'BONUS JENJANG (BULANAN)'
 
             WHEN %(use_custom_5)s = 1
-                 AND m.sales_bulanan >= t.target
-                THEN 'BONUS TARGET BULANAN (OUTLET)'   -- 🔹 TAMBAHAN
+                AND m.sales_bulanan >= t.target * %(c5_tier_1_ach)s
+                THEN 'BONUS TARGET BULANAN (OUTLET)'
+
 
             ELSE 'TIDAK DAPAT BONUS'
         END AS keterangan_bonus,
@@ -126,6 +127,7 @@ salary_logic AS (
             WHEN %(use_custom_5)s = 1
                 AND m.sales_bulanan >= t.target * %(c5_tier_1_ach)s
             THEN m.sales_bulanan * %(c5_tier_1_pct)s
+
 
 
             ELSE 0
