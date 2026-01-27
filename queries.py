@@ -45,7 +45,7 @@ salary_logic AS (
         ROW_NUMBER() OVER (
         PARTITION BY b.outlet
         ORDER BY b.tanggal
-        ) AS rn
+        ) AS rn,
 
         %(gapok)s AS gapok,
 
