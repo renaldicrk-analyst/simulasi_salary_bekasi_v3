@@ -5,12 +5,14 @@ import pandas as pd
 from queries import SIMULATION_QUERY
 from db import fetch_dataframe
 
+
 # PAGE CONFIG
 
 st.set_page_config(page_title="Simulasi Penggajian", layout="wide")
 st.title("Simulasi Penggajian")
 
 branch = "Jakarta"
+
 
 # SIDEBAR – PILIH SKEMA
 
@@ -23,7 +25,6 @@ mode_label = st.sidebar.radio(
         "Custom 2 – Bonus Berjenjang Harian",
         "Custom 3 – Bonus Fixed Bulanan",
         "Custom 4 – Bonus Berjenjang Bulanan",
-        "Custom 5 – Bonus Target Bulanan Outlet",  # 🔹 TAMBAHAN
     ]
 )
 
@@ -32,10 +33,10 @@ mode_key = {
     "Custom 2 – Bonus Berjenjang Harian": "custom_2",
     "Custom 3 – Bonus Fixed Bulanan": "custom_3",
     "Custom 4 – Bonus Berjenjang Bulanan": "custom_4",
-    "Custom 5 – Bonus Target Bulanan Outlet": "custom_5",  # 🔹 TAMBAHAN
 }[mode_label]
 
 st.sidebar.divider()
+
 
 # JUMLAH HARI
 
@@ -43,9 +44,11 @@ days = st.sidebar.slider("Jumlah Hari Kerja", 1, 31, 26)
 start_date = dt.date(2025, 11, 1)
 end_date = start_date + dt.timedelta(days=days - 1)
 
+
 # GAPOK
 
 gapok = st.sidebar.number_input("Gapok / Hari", value=115_000, step=5_000)
+
 
 # GAJI CREW PERBANTUAN
 
@@ -54,6 +57,8 @@ gaji_perbantuan = st.sidebar.number_input(
     value=100_000,
     step=5_000
 )
+
+
 
 # DEFAULT PARAM (ANTI SQL ERROR)
 
@@ -65,7 +70,6 @@ monthly_sales_trigger = monthly_fixed_bonus = 0
 monthly_tier_1_sales = monthly_tier_2_sales = monthly_tier_3_sales = 0
 monthly_tier_1_pct = monthly_tier_2_pct = monthly_tier_3_pct = 0.0
 
-custom_5_bonus = 0  # 🔹 TAMBAHAN
 
 # SETTING BONUS
 
@@ -92,12 +96,6 @@ elif mode_key == "custom_4":
     monthly_tier_2_pct = st.sidebar.number_input("Bonus % Tier 2", value=0.08, step=0.005)
     monthly_tier_3_sales = st.sidebar.number_input("Tier 3 ≥", value=60_000_000)
     monthly_tier_3_pct = st.sidebar.number_input("Bonus % Tier 3", value=0.10, step=0.005)
-
-elif mode_key == "custom_5":  # 🔹 TAMBAHAN
-    custom_5_bonus = st.sidebar.number_input(
-        "Bonus Bulanan (Jika Achieve Target Outlet)",
-        value=1_500_000
-    )
 
 # CREW PERBANTUAN
 st.sidebar.divider()
@@ -164,7 +162,7 @@ elif mode_key == "custom_3":
         """
     )
 
-elif mode_key == "custom_4":
+else:
     st.info(
         f"""
         **Skema Custom 4 – Bonus Berjenjang Bulanan**
@@ -183,24 +181,6 @@ elif mode_key == "custom_4":
         """
     )
 
-else:  # 🔹 CUSTOM 5
-    st.info(
-        f"""
-        **Skema Custom 5 – Bonus Target Bulanan per Outlet**
-
-        - Gapok dibayar **harian**
-        - Bonus **bulanan per outlet**
-        - Target **berbeda tiap outlet** (master_target Nov 2025)
-        - Bonus dibagi rata ke hari aktif outlet
-
-        **Bonus Bulanan:**
-        Rp {custom_5_bonus:,.0f} / outlet (jika achieve)
-
-        **Crew Perbantuan:**  
-        {"Aktif (berdasarkan threshold sales harian)" if use_perbantuan else "Tidak digunakan"}
-        """
-    )
-
 # PARAMS SQL
 params = {
     "branch": branch,
@@ -212,7 +192,6 @@ params = {
     "use_tier_bonus": 1 if mode_key == "custom_2" else 0,
     "use_monthly_fixed": 1 if mode_key == "custom_3" else 0,
     "use_monthly_tier": 1 if mode_key == "custom_4" else 0,
-    "use_custom_5": 1 if mode_key == "custom_5" else 0,  # 🔹 TAMBAHAN
 
     "bonus_trigger": bonus_trigger,
     "flat_bonus": flat_bonus,
@@ -233,8 +212,6 @@ params = {
     "monthly_tier_1_pct": monthly_tier_1_pct,
     "monthly_tier_2_pct": monthly_tier_2_pct,
     "monthly_tier_3_pct": monthly_tier_3_pct,
-
-    "custom_5_bonus": custom_5_bonus,  # 🔹 TAMBAHAN
 
     "use_perbantuan": 1 if use_perbantuan else 0,
     "crew_1_threshold": crew_1_threshold,
@@ -294,7 +271,7 @@ if mode_key in ["custom_1", "custom_2"]:
         use_container_width=True,
     )
 
-# ================= CUSTOM 3, 4 & 5 ========================
+# ================= CUSTOM 3 & 4 ========================
 else:
     st.subheader("Ringkasan Bonus Bulanan")
 
@@ -306,9 +283,12 @@ else:
 
     achieved = bonus_df[bonus_df["bonus"] > 0]
 
-    total_outlet = df["outlet"].nunique()
-    achieved_outlet = achieved["outlet"].nunique()
-    achievement_pct = (achieved_outlet / total_outlet) if total_outlet > 0 else 0
+    
+    # HITUNG INFO ADDITIONAL
+    
+    total_outlet = df["outlet"].nunique()                      # total outlet unik
+    achieved_outlet = achieved["outlet"].nunique()            # outlet yang achieve
+    achievement_pct = (achieved_outlet / total_outlet) if total_outlet > 0 else 0  # persentase
 
     total_sales = df["sales"].sum()
     total_salary_without_bonus = df["total_salary"].sum()
