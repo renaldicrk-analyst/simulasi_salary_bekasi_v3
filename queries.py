@@ -11,18 +11,45 @@ WITH base AS (
 ),
 
 -- ======================================================
--- LOGIKA BONUS HARIAN BERJENJANG (HANYA HARI ≥ THRESHOLD)
+-- HITUNG TOTAL SALES BULANAN PER OUTLET
+-- ======================================================
+monthly_sales AS (
+    SELECT
+        outlet,
+        SUM(sales) AS total_sales_bulanan
+    FROM base
+    GROUP BY outlet
+),
+
+-- ======================================================
+-- TENTUKAN TIER BONUS BULANAN PER OUTLET
+-- ======================================================
+tier AS (
+    SELECT
+        m.outlet,
+        m.total_sales_bulanan,
+        CASE
+            WHEN m.total_sales_bulanan >= %(tier_3_sales)s THEN %(tier_3_pct)s
+            WHEN m.total_sales_bulanan >= %(tier_2_sales)s THEN %(tier_2_pct)s
+            WHEN m.total_sales_bulanan >= %(tier_1_sales)s THEN %(tier_1_pct)s
+            ELSE 0
+        END AS bonus_pct
+    FROM monthly_sales m
+),
+
+-- ======================================================
+-- HITUNG BONUS HARIAN (HANYA HARI ≥ THRESHOLD)
 -- ======================================================
 bonus_logic AS (
     SELECT
-        *,
+        b.*,
+        t.bonus_pct,
         CASE
-            WHEN sales >= %(daily_bonus_threshold)s AND sales >= %(tier_3_sales)s THEN sales * %(tier_3_pct)s
-            WHEN sales >= %(daily_bonus_threshold)s AND sales >= %(tier_2_sales)s THEN sales * %(tier_2_pct)s
-            WHEN sales >= %(daily_bonus_threshold)s AND sales >= %(tier_1_sales)s THEN sales * %(tier_1_pct)s
+            WHEN b.sales >= %(daily_bonus_threshold)s THEN b.sales * t.bonus_pct
             ELSE 0
         END AS bonus_crew_utama
-    FROM base
+    FROM base b
+    LEFT JOIN tier t ON b.outlet = t.outlet
 ),
 
 -- ======================================================

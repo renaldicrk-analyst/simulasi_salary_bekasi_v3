@@ -20,7 +20,7 @@ branch = "Jakarta"
 # ======================================================
 # SIDEBAR – PARAMETER SKEMA BARU
 # ======================================================
-st.sidebar.header("Skema Custom 6 – Bonus Bulanan Berjenjang (Hari Lolos Threshold)")
+st.sidebar.header("Skema Custom 6 – Bonus Bulanan Berjenjang (Sales Bulanan)")
 
 days = st.sidebar.slider("Jumlah Hari Kerja", 1, 31, 26)
 start_date = dt.date(2025, 11, 1)
@@ -32,14 +32,14 @@ gaji_perbantuan = st.sidebar.number_input("Gaji Crew Perbantuan / Hari", value=1
 # Threshold bonus harian
 daily_bonus_threshold = st.sidebar.number_input("Sales minimal masuk bonus / hari", value=1_000_000, step=50_000)
 
-# Jenjang bonus
-tier_1_sales = st.sidebar.number_input("Tier 1 ≥", value=1_200_000)
+# Jenjang bonus berdasarkan total sales bulanan
+tier_1_sales = st.sidebar.number_input("Tier 1 Total Sales Bulanan ≥", value=30_000_000)
 tier_1_pct = st.sidebar.number_input("Bonus % Tier 1", value=0.05, step=0.005)
 
-tier_2_sales = st.sidebar.number_input("Tier 2 ≥", value=1_700_000)
+tier_2_sales = st.sidebar.number_input("Tier 2 Total Sales Bulanan ≥", value=51_000_000)
 tier_2_pct = st.sidebar.number_input("Bonus % Tier 2", value=0.08, step=0.005)
 
-tier_3_sales = st.sidebar.number_input("Tier 3 ≥", value=2_200_000)
+tier_3_sales = st.sidebar.number_input("Tier 3 Total Sales Bulanan ≥", value=66_000_000)
 tier_3_pct = st.sidebar.number_input("Bonus % Tier 3", value=0.10, step=0.005)
 
 # Crew perbantuan
@@ -54,10 +54,10 @@ crew_3_threshold = st.sidebar.number_input("Sales ≥ +3 Crew", value=3_700_000)
 # ======================================================
 st.info(
     f"""
-**Skema Custom 6 – Bonus Bulanan per Hari Threshold**
+**Skema Custom 6 – Bonus Bulanan berdasarkan Total Sales Bulanan**
 - Gapok harian: Rp {gapok:,.0f}
 - Bonus dihitung dari hari yang sales ≥ Rp {daily_bonus_threshold:,.0f}
-- Jenjang bonus harian:
+- Jenjang bonus bulanan berdasarkan total sales outlet:
     - ≥ Rp {tier_1_sales:,.0f} → {tier_1_pct:.0%}
     - ≥ Rp {tier_2_sales:,.0f} → {tier_2_pct:.0%}
     - ≥ Rp {tier_3_sales:,.0f} → {tier_3_pct:.0%}
