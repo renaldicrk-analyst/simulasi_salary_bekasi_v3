@@ -15,7 +15,7 @@ st.set_page_config(
 
 st.title("Simulasi Penggajian – Custom 6")
 
-branch = "Bandung"
+branch = "Jakarta"
 
 # ======================================================
 # SIDEBAR – PARAMETER SKEMA BARU
