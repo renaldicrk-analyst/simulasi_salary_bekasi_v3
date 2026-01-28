@@ -33,19 +33,26 @@ tier AS (
             WHEN m.total_sales_bulanan >= %(tier_2_sales)s THEN %(tier_2_pct)s
             WHEN m.total_sales_bulanan >= %(tier_1_sales)s THEN %(tier_1_pct)s
             ELSE 0
-        END AS bonus_pct
+        END AS bonus_pct,
+        CASE
+            WHEN m.total_sales_bulanan >= %(tier_3_sales)s THEN %(daily_threshold_3)s
+            WHEN m.total_sales_bulanan >= %(tier_2_sales)s THEN %(daily_threshold_2)s
+            WHEN m.total_sales_bulanan >= %(tier_1_sales)s THEN %(daily_threshold_1)s
+            ELSE NULL
+        END AS daily_threshold
     FROM monthly_sales m
 ),
 
 -- ======================================================
--- HITUNG BONUS HARIAN (HANYA HARI ≥ THRESHOLD)
+-- HITUNG BONUS HARIAN (HANYA HARI ≥ THRESHOLD SESUAI TIER)
 -- ======================================================
 bonus_logic AS (
     SELECT
         b.*,
         t.bonus_pct,
+        t.daily_threshold,
         CASE
-            WHEN b.sales >= %(daily_bonus_threshold)s THEN b.sales * t.bonus_pct
+            WHEN b.sales >= t.daily_threshold THEN b.sales * t.bonus_pct
             ELSE 0
         END AS bonus_crew_utama
     FROM base b
