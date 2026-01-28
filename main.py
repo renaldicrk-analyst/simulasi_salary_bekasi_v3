@@ -24,7 +24,7 @@ st.sidebar.header("Skema Custom 6 – Bonus Bulanan Berjenjang (Sales Bulanan)")
 
 # Jumlah hari kerja
 days = st.sidebar.slider("Jumlah Hari Kerja", 1, 31, 26)
-start_date = dt.date(2025, 11, 1)
+start_date = dt.date(2026, 1, 1)
 end_date = start_date + dt.timedelta(days=days - 1)
 
 # Gapok dan gaji perbantuan
