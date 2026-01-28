@@ -140,6 +140,75 @@ c3.metric("Total Salary", f"Rp {total_salary:,.0f}")
 st.metric("Salary Cost", f"{total_salary / total_sales:.2%}")
 
 # ======================================================
+# ACHIEVEMENT OUTLET PER TIER (BARU)
+# ======================================================
+st.subheader("Achievement Outlet per Tier")
+
+outlet_sales = (
+    df.groupby("outlet", as_index=False)
+      .agg(total_sales=("sales", "sum"))
+)
+
+def assign_tier(x):
+    if x >= tier_3_sales:
+        return "Tier 3"
+    elif x >= tier_2_sales:
+        return "Tier 2"
+    elif x >= tier_1_sales:
+        return "Tier 1"
+    else:
+        return "Tidak Achieve"
+
+outlet_sales["tier"] = outlet_sales["total_sales"].apply(assign_tier)
+
+tier_summary = (
+    outlet_sales
+    .groupby("tier")
+    .agg(jumlah_outlet=("outlet", "count"))
+    .reset_index()
+)
+
+total_outlet = outlet_sales["outlet"].nunique()
+tier_summary["persentase"] = tier_summary["jumlah_outlet"] / total_outlet
+
+tier_order = ["Tier 3", "Tier 2", "Tier 1", "Tidak Achieve"]
+tier_summary["tier"] = pd.Categorical(tier_summary["tier"], tier_order)
+tier_summary = tier_summary.sort_values("tier")
+
+tier_map = tier_summary.set_index("tier")
+
+c1, c2, c3, c4 = st.columns(4)
+
+c1.metric(
+    "Tier 3",
+    int(tier_map.loc["Tier 3", "jumlah_outlet"]) if "Tier 3" in tier_map.index else 0,
+    f"{tier_map.loc['Tier 3','persentase']:.0%}" if "Tier 3" in tier_map.index else "0%"
+)
+
+c2.metric(
+    "Tier 2",
+    int(tier_map.loc["Tier 2", "jumlah_outlet"]) if "Tier 2" in tier_map.index else 0,
+    f"{tier_map.loc['Tier 2','persentase']:.0%}" if "Tier 2" in tier_map.index else "0%"
+)
+
+c3.metric(
+    "Tier 1",
+    int(tier_map.loc["Tier 1", "jumlah_outlet"]) if "Tier 1" in tier_map.index else 0,
+    f"{tier_map.loc['Tier 1','persentase']:.0%}" if "Tier 1" in tier_map.index else "0%"
+)
+
+c4.metric(
+    "Tidak Achieve",
+    int(tier_map.loc["Tidak Achieve", "jumlah_outlet"]) if "Tidak Achieve" in tier_map.index else 0,
+    f"{tier_map.loc['Tidak Achieve','persentase']:.0%}" if "Tidak Achieve" in tier_map.index else "0%"
+)
+
+st.dataframe(
+    outlet_sales.sort_values("total_sales", ascending=False),
+    use_container_width=True
+)
+
+# ======================================================
 # DETAIL HARIAN
 # ======================================================
 st.subheader("Detail Harian")
